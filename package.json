@@ -1,0 +1,30 @@
+{
+  "name": "app-ts-tlp",
+  "version": "1.0.0",
+  "description": "Objetivo:\r Desarrollar una aplicación que gestione el inventario de equipos informáticos de una\r empresa, utilizando TypeScript, una base de datos (PostgreSQL o MongoDB),\r autenticación basada en JSON Web Token (JWT) y un front-end sencillo con React.\r Contexto:\r La empresa FORMOTEX se dedica al mantenimiento y distribución de equipos\r informáticos para diversas organizaciones. Actualmente, la empresa gestiona su inventario\r de manera manual, lo que provoca errores en el seguimiento de los equipos, como la falta\r de información actualizada sobre su estado, ubicación y fecha de adquisición.\r Requerimientos:\r 1. Funcionalidades CRUD:\r • La aplicación debe permitir las operaciones básicas de gestión de equipos\r informáticos.\r • Solo los usuarios autenticados podrán acceder a la aplicación y realizar\r operaciones CRUD.\r • FUNCIONALIDAD ADICIONALES: Según su abstracción, determine las\r funcionalidades adicionales, requeridas para el manejo de inventario de los\r equipos informáticos.\r 2. Autenticación con JWT:\r • Implementar un sistema de autenticación utilizando JWT.\r • Los usuarios deben iniciar sesión utilizando un endpoint de autenticación.\r • Una vez autenticados, recibirán un token que deberán enviar en el\r encabezado de las solicitudes a los endpoints protegidos.\r • Endpoints protegidos: Los endpoints de creación, actualización,\r eliminación y listado de equipos deben requerir un token válido, y un rol\r específico de usuario.\r • Endpoints:\r  POST /auth/login: Permitir a los usuarios autenticarse con\r credenciales (usuario y contraseña).\r  POST /auth/register: Permitir el registro de nuevos usuarios\r (opcional).\r 3. Front-end con React:\r • Crear un front-end sencillo que consuma la API.\r • Implementar un formulario de login en React para permitir que los usuarios\r ingresen sus credenciales y obtengan el JWT.\r • Al iniciar sesión, almacenar el token en el localStorage del navegador.\r • El front-end debe permitir a los usuarios visualizar el inventario de equipos,\r agregar nuevos equipos, actualizar y eliminarlos.\r • Enviar el JWT en el encabezado de cada solicitud para acceder a los\r endpoints protegidos.",
+  "main": "app.js",
+  "scripts": {
+    "dev": "nodemon ./src/app.ts",
+    "build": "rimraf ./dist && tsc",
+    "start": "npm run build && node dist/app.ts"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.20.0",
+    "moongose": "^1.0.0",
+    "morgan": "^1.10.0"
+  },
+  "devDependencies": {
+    "@types/bcryptjs": "^2.4.6",
+    "@types/cors": "^2.8.17",
+    "@types/express": "^4.17.21",
+    "@types/morgan": "^1.9.9",
+    "nodemon": "^3.1.4",
+    "ts-node": "^10.9.2"
+  }
+}
