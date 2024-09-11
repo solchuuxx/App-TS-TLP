@@ -5,7 +5,7 @@ const equipmentSchema = new Schema({
   type: { type: String, required: true },
   status: { type: String, enum: ['Disponible', 'En Reparación', 'Asignado'], default: 'Disponible' },
   location: { type: String, required: true },
-  acquisitionDate: { type: Date, required: true },
+  acquisitionDate: { type: String, required: true },
 });
 
 export const Equipment = model('Equipment', equipmentSchema);
