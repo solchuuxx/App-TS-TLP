@@ -1,20 +1,12 @@
-import React from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import LoginPage from '../src/pages/Login';
-import Dashboard from '../src/pages/Dashboard';
-import PrivateRoute from './components/PrivateRoute';
+import { StrictMode } from 'react'
+import { createRoot } from 'react-dom/client'
+import { BrowserRouter } from 'react-router-dom'
+import App from '../src/App'
 
-const App: React.FC = () => (
-  <Router>
-    <Routes>
-      <Route path="/login" element={<LoginPage />} />
-      <Route
-        path="/dashboard"
-        element={<PrivateRoute element={<Dashboard />} />}
-      />
-      <Route path="/" element={<Navigate to="/login" />} />
-    </Routes>
-  </Router>
-);
-
-export default App;
+createRoot(document.getElementById('root')!).render(
+  <StrictMode>
+    <BrowserRouter>
+      <App />
+    </BrowserRouter>
+  </StrictMode>,
+)

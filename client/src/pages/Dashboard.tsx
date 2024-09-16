@@ -1,40 +1,60 @@
 import React, { useEffect, useState } from 'react';
-import EquipmentService from '../../../server/src/services/equipment.service';
-import { Product } from '../types/index';
+import { Button, TextField, Select, MenuItem, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Typography, IconButton } from '@mui/material';
+import { GoPencil, GoTrash } from 'react-icons/go';
+import { Product } from '../types/product.interface';
+import '../styles/Dashboard.css'; // Asegúrate de incluir este archivo CSS
 
 const Dashboard: React.FC = () => {
-  const [equipments, setEquipments] = useState<Product[]>([]);
+  const [stock, setStock] = useState<Product[]>([]);
   const [newEquipment, setNewEquipment] = useState<Product>({
     name: '',
     type: '',
     status: 'Disponible',
     location: '',
-    acquisitionDate: ''
+    acquisitionDate: '',
   });
+  const [role, setRole] = useState<string>('');
 
   useEffect(() => {
-    const fetchEquipments = async () => {
-      try {
-        const { data } = await EquipmentService.getEquipments();
-        setEquipments(data);
-      } catch (error) {
-        console.error('Error fetching equipments', error);
+    const token = localStorage.getItem('token');
+    if (token) {
+      const userRole = JSON.parse(atob(token.split('.')[1])).role; 
+      setRole(userRole);
+    }
+
+    fetch('http://localhost:8000/api/equipments', {
+      headers: {
+        'Authorization': `Bearer ${token}`
       }
-    };
-    fetchEquipments();
+    })
+      .then((res) => res.json())
+      .then((data) => setStock(data))
+      .catch((err) => console.error(err));
   }, []);
 
   const handleAddEquipment = async () => {
     try {
-      const { data } = await EquipmentService.createEquipment(newEquipment);
-      setEquipments([...equipments, data]);
-      setNewEquipment({
-        name: '',
-        type: '',
-        status: 'Disponible',
-        location: '',
-        acquisitionDate: ''
+      const res = await fetch('http://localhost:8000/api/equipments', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        },
+        body: JSON.stringify(newEquipment),
       });
+      if (res.status === 200) {
+        const data = await res.json();
+        setStock([...stock, data]);
+        setNewEquipment({
+          name: '',
+          type: '',
+          status: 'Disponible',
+          location: '',
+          acquisitionDate: '',
+        });
+      } else {
+        console.error('Failed to add equipment', await res.text());
+      }
     } catch (error) {
       console.error('Error adding equipment', error);
     }
@@ -42,9 +62,19 @@ const Dashboard: React.FC = () => {
 
   const handleUpdateEquipment = async (id: string, updatedEquipment: Product) => {
     try {
-      if (id) {
-        const { data } = await EquipmentService.updateEquipment(id, updatedEquipment);
-        setEquipments(equipments.map(e => (e.id === id ? data : e)));
+      const res = await fetch(`http://localhost:8000/api/equipments/${id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        },
+        body: JSON.stringify(updatedEquipment),
+      });
+      if (res.status === 200) {
+        const data = await res.json();
+        setStock(stock.map(e => (e.id === id ? data : e)));
+      } else {
+        console.error('Failed to update equipment', await res.text());
       }
     } catch (error) {
       console.error('Error updating equipment', error);
@@ -53,9 +83,16 @@ const Dashboard: React.FC = () => {
 
   const handleDeleteEquipment = async (id: string) => {
     try {
-      if (id) {
-        await EquipmentService.deleteEquipment(id);
-        setEquipments(equipments.filter(e => e.id !== id));
+      const res = await fetch(`http://localhost:8000/api/equipments/${id}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        }
+      });
+      if (res.status === 200) {
+        setStock(stock.filter(e => e.id !== id));
+      } else {
+        console.error('Failed to delete equipment', await res.text());
       }
     } catch (error) {
       console.error('Error deleting equipment', error);
@@ -63,53 +100,99 @@ const Dashboard: React.FC = () => {
   };
 
   return (
-    <div>
-      <h2>Dashboard</h2>
-      <div>
-        <h3>Equipos</h3>
-        <ul>
-          {equipments.map((equipment) => (
-            <li key={equipment.id!}>
-              {equipment.name} - {equipment.type} - {equipment.status} - {equipment.location} - {equipment.acquisitionDate}
-              <button onClick={() => equipment.id && handleUpdateEquipment(equipment.id, { ...equipment, status: 'En Reparación' })}>Update</button>
-              <button onClick={() => equipment.id && handleDeleteEquipment(equipment.id)}>Delete</button>
-            </li>
-          ))}
-        </ul>
-        <input
-          type="text"
-          placeholder="Nombre del Equipo"
-          value={newEquipment.name}
-          onChange={(e) => setNewEquipment({ ...newEquipment, name: e.target.value })}
-        />
-        <input
-          type="text"
-          placeholder="Tipo"
-          value={newEquipment.type}
-          onChange={(e) => setNewEquipment({ ...newEquipment, type: e.target.value })}
-        />
-        <select
-          value={newEquipment.status}
-          onChange={(e) => setNewEquipment({ ...newEquipment, status: e.target.value as 'Disponible' | 'En Reparación' | 'Asignado' })}
-        >
-          <option value="Disponible">Disponible</option>
-          <option value="En Reparación">En Reparación</option>
-          <option value="Asignado">Asignado</option>
-        </select>
-        <input
-          type="text"
-          placeholder="Ubicación"
-          value={newEquipment.location}
-          onChange={(e) => setNewEquipment({ ...newEquipment, location: e.target.value })}
-        />
-        <input
-          type="date"
-          placeholder="Fecha de Adquisición"
-          value={newEquipment.acquisitionDate}
-          onChange={(e) => setNewEquipment({ ...newEquipment, acquisitionDate: e.target.value })}
-        />
-        <button onClick={handleAddEquipment}>Añadir Equipo</button>
-      </div>
+    <div className='dashboard-container'>
+      <Typography variant="h4" gutterBottom className='dashboard-title'>Inventario de Equipos</Typography>
+
+      {role === 'admin' && (
+        <div className='form-container'>
+          <Typography variant="h6" className='form-title'>Añadir Equipo</Typography>
+          <TextField
+            label="Nombre del Equipo"
+            variant="outlined"
+            fullWidth
+            margin="normal"
+            value={newEquipment.name}
+            onChange={(e) => setNewEquipment({ ...newEquipment, name: e.target.value })}
+            className='form-input'
+          />
+          <TextField
+            label="Tipo"
+            variant="outlined"
+            fullWidth
+            margin="normal"
+            value={newEquipment.type}
+            onChange={(e) => setNewEquipment({ ...newEquipment, type: e.target.value })}
+            className='form-input'
+          />
+          <Select
+            value={newEquipment.status}
+            onChange={(e) => setNewEquipment({ ...newEquipment, status: e.target.value as 'Disponible' | 'En Reparación' | 'Asignado' })}
+            fullWidth
+            className='form-select'
+          >
+            <MenuItem value="Disponible">Disponible</MenuItem>
+            <MenuItem value="En Reparación">En Reparación</MenuItem>
+            <MenuItem value="Asignado">Asignado</MenuItem>
+          </Select>
+          <TextField
+            label="Ubicación"
+            variant="outlined"
+            fullWidth
+            margin="normal"
+            value={newEquipment.location}
+            onChange={(e) => setNewEquipment({ ...newEquipment, location: e.target.value })}
+            className='form-input'
+          />
+          <TextField
+            label="Fecha de Adquisición"
+            variant="outlined"
+            fullWidth
+            margin="normal"
+            type="date"
+            InputLabelProps={{ shrink: true }}
+            value={newEquipment.acquisitionDate}
+            onChange={(e) => setNewEquipment({ ...newEquipment, acquisitionDate: e.target.value })}
+            className='form-input'
+          />
+          <Button variant="contained" color="primary" onClick={handleAddEquipment} className='submit-button'>Añadir Equipo</Button>
+        </div>
+      )}
+
+      <TableContainer component={Paper} className='table-container'>
+        <Table>
+          <TableHead>
+            <TableRow>
+              <TableCell>Nombre</TableCell>
+              <TableCell>Tipo</TableCell>
+              <TableCell>Estado</TableCell>
+              <TableCell>Ubicación</TableCell>
+              <TableCell>Fecha de Adquisición</TableCell>
+              {role === 'admin' && <TableCell>Acciones</TableCell>}
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {stock.map((equip: Product) => (
+              <TableRow key={equip.id}>
+                <TableCell>{equip.name}</TableCell>
+                <TableCell>{equip.type}</TableCell>
+                <TableCell>{equip.status}</TableCell>
+                <TableCell>{equip.location}</TableCell>
+                <TableCell>{equip.acquisitionDate}</TableCell>
+                {role === 'admin' && (
+                  <TableCell>
+                    <IconButton color="primary" onClick={() => equip.id && handleUpdateEquipment(equip.id, { ...equip, status: 'En Reparación' })}>
+                      <GoPencil />
+                    </IconButton>
+                    <IconButton color="error" onClick={() => equip.id && handleDeleteEquipment(equip.id)}>
+                      <GoTrash />
+                    </IconButton>
+                  </TableCell>
+                )}
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </TableContainer>
     </div>
   );
 };
