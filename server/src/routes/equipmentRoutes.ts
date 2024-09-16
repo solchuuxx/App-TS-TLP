@@ -1,15 +1,15 @@
 import express from 'express';
-import { createEquipment, getEquipments, updateEquipment, deleteEquipment } from '../controllers/equipmentController';
-import { verifyToken, checkRole } from '../middlewares/authMiddleware'; 
+import EquipmentController from '../controllers/equipmentController';
+import { verifyToken, checkRole } from '../middlewares/authMiddleware';
 
 const router = express.Router();
 
-router.post('/equipments', verifyToken, checkRole('admin'), createEquipment);
+router.post('/equipments', verifyToken, checkRole('admin'), EquipmentController.createEquipment);
 
-router.get('/equipments', verifyToken, getEquipments);
+router.get('/equipments', verifyToken, EquipmentController.getEquipments);
 
-router.put('/equipments/:id', verifyToken, checkRole('admin'), updateEquipment);
+router.put('/equipments/:id', verifyToken, checkRole('admin'), EquipmentController.updateEquipment);
 
-router.delete('/equipments/:id', verifyToken, checkRole('admin'), deleteEquipment);
+router.delete('/equipments/:id', verifyToken, checkRole('admin'), EquipmentController.deleteEquipment);
 
 export default router;

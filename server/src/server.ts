@@ -12,7 +12,7 @@ export class Server {
 
     constructor() {
         this.app = express();
-        this.port = 5000;
+        this.port = 8000;
         this.configuration();
         this.middlewares();
         this.routes();
