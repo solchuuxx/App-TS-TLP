@@ -55,13 +55,13 @@ class EquipmentController {
     try {
       const { id } = req.params;
       const data: Partial<Equipment> = req.body; 
-
+  
       const updatedEquipment = await EquipmentService.updateEquipment(id, data);
-
+  
       if (!updatedEquipment) {
         return res.status(500).json({ message: 'No se ha podido actualizar el equipo!' });
       }
-
+  
       res.status(200).json(updatedEquipment);
     } catch (err) {
       console.error('Error al actualizar el equipo:', err);
